@@ -31,7 +31,7 @@ void PWM_Init(void){
 	TIM_ClearFlag(TIM1, TIM_FLAG_Update);
 	
 	//配置输出比较模式
-	//TIM_CtrlPWMOutputs(TIM1, DISABLE);
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 	TIM_OCInitTypeDef TIMOC_InitStructure;
 	TIM_OCStructInit(&TIMOC_InitStructure);
 	TIMOC_InitStructure.TIM_OCMode = TIM_OCMode_PWM1; //使用PWM1模式，ARR小于CCR时为有效电平，大于等于时为无效电平

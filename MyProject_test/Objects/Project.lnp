@@ -32,6 +32,8 @@
 ".\objects\serial.o"
 ".\objects\encoder.o"
 ".\objects\mpu6050.o"
+".\objects\pid.o"
+".\objects\timer.o"
 ".\objects\main.o"
 ".\objects\stm32f10x_it.o"
 --strict --scatter ".\Objects\Project.sct"

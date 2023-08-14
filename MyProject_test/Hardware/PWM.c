@@ -16,7 +16,7 @@ void PWM_Init(void){
 	//配置PA8
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 在使用片上外设作为输出时需配置为复用推挽输出模式
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
@@ -38,7 +38,9 @@ void PWM_Init(void){
 	TIMOC_InitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // 设置高电平为有效电平
 	TIMOC_InitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIMOC_InitStructure.TIM_Pulse = 0; //CCR
+	
 	TIM_OC1Init(TIM1, &TIMOC_InitStructure);
+	TIM_OC2Init(TIM1, &TIMOC_InitStructure);
 	TIM_Cmd(TIM1, ENABLE);
 }
 
@@ -49,4 +51,9 @@ void PWM_Init(void){
   */
 void PWM_SetCompare1(uint16_t Compare1){
 	TIM_SetCompare1(TIM1, Compare1);
+}
+
+void PWM_SetCompare2(uint16_t Compare2)
+{
+	TIM_SetCompare2(TIM1, Compare2);
 }

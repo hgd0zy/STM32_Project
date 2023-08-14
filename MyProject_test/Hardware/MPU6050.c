@@ -17,19 +17,19 @@ static void WaitEvent(I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 //指定MPU6050寄存器写入值
 void MPU6050_WReg(uint8_t Reg, uint8_t Command)
 {
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Transmitter);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Transmitter);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
 	
-	I2C_SendData(I2C1, Reg);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+	I2C_SendData(I2C2, Reg);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
 	
-	I2C_SendData(I2C1, Command);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+	I2C_SendData(I2C2, Command);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
 	
-	I2C_GenerateSTOP(I2C1, ENABLE);
+	I2C_GenerateSTOP(I2C2, ENABLE);
 	
 }
 
@@ -38,28 +38,28 @@ uint8_t MPU6050_RReg(uint8_t Reg)
 {
 	uint8_t Data;
 	
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Transmitter);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Transmitter);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
 	
-	I2C_SendData(I2C1, Reg);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+	I2C_SendData(I2C2, Reg);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
 	
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Receiver);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Receiver);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
 	
-	I2C_AcknowledgeConfig(I2C1, DISABLE);
-	I2C_GenerateSTOP(I2C1, ENABLE);
+	I2C_AcknowledgeConfig(I2C2, DISABLE);
+	I2C_GenerateSTOP(I2C2, ENABLE);
 	
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED);
-	Data = I2C_ReceiveData(I2C1);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_RECEIVED);
+	Data = I2C_ReceiveData(I2C2);
 	
-	I2C_AcknowledgeConfig(I2C1, ENABLE);
+	I2C_AcknowledgeConfig(I2C2, ENABLE);
 	
 	return Data;
 }
@@ -67,12 +67,12 @@ uint8_t MPU6050_RReg(uint8_t Reg)
 //初始化MPU6050电源与寄存器配置等
 void MPU6050_Init(void)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
@@ -83,9 +83,9 @@ void MPU6050_Init(void)
 	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_OwnAddress1 = 0x00;
-	I2C_Init(I2C1, &I2C_InitStructure);
+	I2C_Init(I2C2, &I2C_InitStructure);
 	
-	I2C_Cmd(I2C1, ENABLE);
+	I2C_Cmd(I2C2, ENABLE);
 	
 	MPU6050_WReg(MPU6050_PWR_MGMT_1, 0x01);
 	MPU6050_WReg(MPU6050_PWR_MGMT_2, 0x00);
@@ -106,25 +106,25 @@ void MPU6050_WriteRegArray(uint8_t *Array, uint8_t Reg, uint8_t Length)
 {
 	uint8_t i;
 	
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Transmitter);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Transmitter);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
 	
-	I2C_SendData(I2C1, Reg);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+	I2C_SendData(I2C2, Reg);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
 	
 	for	(i=0;i<Length - 1;i++) 
 	{
-		I2C_SendData(I2C1, Array[i]);
-		WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
+		I2C_SendData(I2C2, Array[i]);
+		WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTING);
 	}
 	
-	I2C_SendData(I2C1, Array[i]);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+	I2C_SendData(I2C2, Array[i]);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
 	
-	I2C_GenerateSTOP(I2C1, ENABLE);
+	I2C_GenerateSTOP(I2C2, ENABLE);
 }
 
 //接收一个数组的数据，即连续读
@@ -132,34 +132,34 @@ void MPU6050_ReadRegArray(uint8_t *Array, uint8_t Reg, uint8_t Length)
 {
 	uint8_t i;
 	
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Transmitter);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Transmitter);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED);
 	
-	I2C_SendData(I2C1, Reg);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
+	I2C_SendData(I2C2, Reg);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED);
 	
-	I2C_GenerateSTART(I2C1, ENABLE);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT);
+	I2C_GenerateSTART(I2C2, ENABLE);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT);
 	
-	I2C_Send7bitAddress(I2C1, MPU6050_Address, I2C_Direction_Receiver);
-	WaitEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
+	I2C_Send7bitAddress(I2C2, MPU6050_Address, I2C_Direction_Receiver);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED);
 	
 	for	(i=0;i<Length - 1;i++) 
 	{
-		WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED);
-		Array[i] =I2C_ReceiveData(I2C1);
+		WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_RECEIVED);
+		Array[i] =I2C_ReceiveData(I2C2);
 	}
 	
-	I2C_AcknowledgeConfig(I2C1, DISABLE);
-	I2C_GenerateSTOP(I2C1, ENABLE);
+	I2C_AcknowledgeConfig(I2C2, DISABLE);
+	I2C_GenerateSTOP(I2C2, ENABLE);
 	
-	WaitEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED);
-	Array[i] =I2C_ReceiveData(I2C1);
+	WaitEvent(I2C2, I2C_EVENT_MASTER_BYTE_RECEIVED);
+	Array[i] =I2C_ReceiveData(I2C2);
 	
-	I2C_AcknowledgeConfig(I2C1, ENABLE);
+	I2C_AcknowledgeConfig(I2C2, ENABLE);
 	
 }
 

@@ -6,22 +6,17 @@
   * @retval 无
   */
 void PWM_Init(void){
-	//使能APB1时钟，TIM2在APB1总线上
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	//使能APB2时钟，TIM1在APB2总线上
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 	//使能GPIOA
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	//定时器内部时钟设置
-	TIM_InternalClockConfig(TIM2);
-	
-	//引脚重映射
-	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); // AFIO使能
-	// GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); //移除端口本身复用功能
-	// GPIO_PinRemapConfig(GPIO_PartialRemap1_TIM2, ENABLE); //设置端口重定义功能
-	
-	//配置PA1
+	TIM_InternalClockConfig(TIM1);
+		
+	//配置PA8
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; // 在使用片上外设作为输出时需配置为复用推挽输出模式
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; // GPIO_Pin_15
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
@@ -32,19 +27,21 @@ void PWM_Init(void){
 	TIM_InitStructure.TIM_Period = 100 - 1; //ARR
 	TIM_InitStructure.TIM_Prescaler = 72 - 1; //PSC
 	TIM_InitStructure.TIM_RepetitionCounter = 0;
-	TIM_TimeBaseInit(TIM2, &TIM_InitStructure);
-	TIM_ClearFlag(TIM2, TIM_FLAG_Update);
+	TIM_TimeBaseInit(TIM1, &TIM_InitStructure);
+	TIM_ClearFlag(TIM1, TIM_FLAG_Update);
 	
 	//配置输出比较模式
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 	TIM_OCInitTypeDef TIMOC_InitStructure;
 	TIM_OCStructInit(&TIMOC_InitStructure);
 	TIMOC_InitStructure.TIM_OCMode = TIM_OCMode_PWM1; //使用PWM1模式，ARR小于CCR时为有效电平，大于等于时为无效电平
 	TIMOC_InitStructure.TIM_OCPolarity = TIM_OCPolarity_High; // 设置高电平为有效电平
 	TIMOC_InitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIMOC_InitStructure.TIM_Pulse = 0; //CCR
-	TIM_OC3Init(TIM2, &TIMOC_InitStructure);
-	TIM_Cmd(TIM2, ENABLE);
 	
+	TIM_OC1Init(TIM1, &TIMOC_InitStructure);
+	TIM_OC2Init(TIM1, &TIMOC_InitStructure);
+	TIM_Cmd(TIM1, ENABLE);
 }
 
 /**
@@ -52,6 +49,11 @@ void PWM_Init(void){
   * @param 宽度值
   * @retval 无
   */
-void PWM_SetCompare3(uint16_t Compare3){
-	TIM_SetCompare3(TIM2, Compare3);
+void PWM_SetCompare1(uint16_t Compare1){
+	TIM_SetCompare1(TIM1, Compare1);
+}
+
+void PWM_SetCompare2(uint16_t Compare2)
+{
+	TIM_SetCompare2(TIM1, Compare2);
 }

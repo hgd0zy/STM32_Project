@@ -1,5 +1,6 @@
 #include "stm32f10x.h"                  // Device header
 #include "PWM.h"
+#include "PID.h"
 
 /**
   * @brief 初始化直流电机驱动
@@ -16,7 +17,7 @@ void Motor_Init(void){
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-	PWM_Init();
+	PID_Init();
 }
 
 /**
@@ -31,8 +32,9 @@ void Motor_SetSpeed(int8_t Speed){
 		GPIO_SetBits(GPIOA, GPIO_Pin_4 | GPIO_Pin_0);
 		GPIO_ResetBits(GPIOA, GPIO_Pin_5 | GPIO_Pin_1);
 		//设置转速
-		PWM_SetCompare1(Speed);
-		PWM_SetCompare2(Speed);
+		PID_SetSpeed(Speed);
+//		PWM_SetCompare1(Speed);
+//		PWM_SetCompare2(Speed);
 	}
 	else 
 	{
@@ -40,7 +42,8 @@ void Motor_SetSpeed(int8_t Speed){
 		GPIO_ResetBits(GPIOA, GPIO_Pin_4 | GPIO_Pin_0);
 		GPIO_SetBits(GPIOA, GPIO_Pin_5 | GPIO_Pin_1);
 		//设置转速
-		PWM_SetCompare1(-Speed);
-		PWM_SetCompare2(-Speed);
+		PID_SetSpeed(-Speed);
+//		PWM_SetCompare1(-Speed);
+//		PWM_SetCompare2(-Speed);
 	}
 }

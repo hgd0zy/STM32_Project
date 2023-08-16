@@ -59,15 +59,15 @@ void Encoder_Init(void)
 uint16_t Encoder_Get1(void)
 {
 	uint16_t Temp;
-	Temp = TIM_GetCounter(TIM3);
-	TIM_SetCounter(TIM3, 0);
+	Temp = TIM_GetCounter(TIM4);
+	TIM_SetCounter(TIM4, 0);
 	return Temp;
 }
 
 uint16_t Encoder_Get2(void)
 {
 	uint16_t Temp;
-	Temp = TIM_GetCounter(TIM4);
-	TIM_SetCounter(TIM4, 0);
+	Temp = TIM_GetCounter(TIM3);
+	TIM_SetCounter(TIM3, 0);
 	return Temp;
 }

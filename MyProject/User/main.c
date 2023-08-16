@@ -53,7 +53,7 @@ int main(void)
 		}
 		OLED_ShowSignedNum(1, 3, (int16_t)Encoder_Get1(), 5);
 		OLED_ShowSignedNum(1, 10, (int16_t)Encoder_Get2(), 5);
-		
+				
 		MPU6050_GetACCEL(MPU6050_ACCEL);
 		MPU6050_GetGYRO(MPU6050_GYRO);
 		

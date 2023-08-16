@@ -47,20 +47,23 @@ int main(void)
 					Serial_printf("Error Command!\r\n");
 					break;
 			}
-			Serial_printf("%d\r\n", Speed);
+			//Serial_printf("%d\r\n", Speed);
 		}
-		OLED_ShowSignedNum(1, 1, (int16_t)Encoder_Get1(), 5);
-		OLED_ShowSignedNum(1, 8, (int16_t)Encoder_Get2(), 5);
+		OLED_ShowString(1, 1, "V:");
+//		OLED_ShowSignedNum(1, 3, (int16_t)Encoder_Get1(), 5);
+//		OLED_ShowSignedNum(1, 11, (int16_t)Encoder_Get2(), 5);
+		OLED_ShowString(2, 1, "Sv:");
+		OLED_ShowSignedNum(2, 4, Speed, 3);
 		
-		MPU6050_GetACCEL(MPU6050_ACCEL);
-		MPU6050_GetGYRO(MPU6050_GYRO);
-		
-		OLED_ShowSignedNum(2, 1, MPU6050_ACCEL[0], 5);
-		OLED_ShowSignedNum(3, 1, MPU6050_ACCEL[1], 5);
-		OLED_ShowSignedNum(4, 1, MPU6050_ACCEL[2], 5);
-		OLED_ShowSignedNum(2, 9, MPU6050_GYRO[0], 5);
-		OLED_ShowSignedNum(3, 9, MPU6050_GYRO[1], 5);
-		OLED_ShowSignedNum(4, 9, MPU6050_GYRO[2], 5);
+//		MPU6050_GetACCEL(MPU6050_ACCEL);
+//		MPU6050_GetGYRO(MPU6050_GYRO);
+//		
+//		OLED_ShowSignedNum(2, 1, MPU6050_ACCEL[0], 5);
+//		OLED_ShowSignedNum(3, 1, MPU6050_ACCEL[1], 5);
+//		OLED_ShowSignedNum(4, 1, MPU6050_ACCEL[2], 5);
+//		OLED_ShowSignedNum(2, 9, MPU6050_GYRO[0], 5);
+//		OLED_ShowSignedNum(3, 9, MPU6050_GYRO[1], 5);
+//		OLED_ShowSignedNum(4, 9, MPU6050_GYRO[2], 5);
 //		
 //		if (MPU6050_ACCEL[2] > max) {max = MPU6050_ACCEL[2];}
 //		else if (MPU6050_ACCEL[2]<min) {min = MPU6050_ACCEL[2];}

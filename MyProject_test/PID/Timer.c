@@ -2,12 +2,12 @@
 
 void Timer_Init(void)
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, DISABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	
 	TIM_TimeBaseInitTypeDef TimerInitStructure;
 	TimerInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TimerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TimerInitStructure.TIM_Period = 1000 - 1;
+	TimerInitStructure.TIM_Period = 100 - 1;
 	TimerInitStructure.TIM_Prescaler = 72 - 1;
 	TimerInitStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM2, &TimerInitStructure);

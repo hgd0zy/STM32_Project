@@ -42,7 +42,7 @@ void Motor_SetSpeed(int8_t Speed){
 		GPIO_ResetBits(GPIOA, GPIO_Pin_4 | GPIO_Pin_0);
 		GPIO_SetBits(GPIOA, GPIO_Pin_5 | GPIO_Pin_1);
 		//设置转速
-		PID_SetSpeed(-Speed);
+		PID_SetSpeed((-Speed));
 //		PWM_SetCompare1(-Speed);
 //		PWM_SetCompare2(-Speed);
 	}

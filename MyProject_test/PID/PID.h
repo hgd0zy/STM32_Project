@@ -3,8 +3,8 @@
 
 typedef struct PID{
 
-	uint16_t Sv; //设定的目标值
-	uint16_t Ep; //当前的测量值
+	uint8_t Sv; //设定的目标值
+	uint8_t Ep; //当前的测量值
 	
 	float Kp; //当前参数
 	float Ti; //积分常量
@@ -23,6 +23,6 @@ typedef struct PID{
 }PID;
 
 void PID_Init(void);
-void PID_SetSpeed(uint16_t Speed);
+void PID_SetSpeed(uint8_t Speed);
 
 #endif

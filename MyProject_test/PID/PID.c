@@ -4,31 +4,36 @@
 #include "Encoder.h"
 #include "Timer.h"
 #include "Serial.h"
+#include "OLED.h"
+
+#define ABS(x) ((x) = (x)<0?-(x):(x))
 
 static PID pid1, pid2;
 static float Ki, Kd, DeltaK1, DeltaK2;
 static uint8_t count = 0;
 static float Out1, Out2;
+int16_t x1, x2;
 	
 void PID_Init(void)
 {
 	pid1.Sv = 00;
-	pid1.Kp = 400;
-	pid1.Ti = 800;
-	pid1.SEk = 0;
-	pid1.T = 100;
-	pid1.Ek_1 = 5;
-	pid1.Td = 0.5;
-	pid1.out0 = 10;
-	
 	pid2.Sv = 00;
-	pid2.Kp = 400;
-	pid2.Ti = 800;
-	pid2.SEk = 0;
-	pid2.T = 100;
-	pid2.Ek_1 = 5;
-	pid2.Td = 0.5;
+	pid1.out0 = 10;
 	pid2.out0 = 10;
+	pid1.SEk = 0;
+	pid2.SEk = 0;
+	pid1.Ek_1 = 5;
+	pid2.Ek_1 = 5;
+	
+	pid1.Kp = 150;
+	pid1.Ti = 400;
+	pid1.T = 50;
+	pid1.Td = 1.1;
+	
+	pid2.Kp = 150;
+	pid2.Ti = 400;
+	pid2.T = 50;
+	pid2.Td = 1.1;
 	
 	Ki = pid1.T / pid1.Ti * pid1.Kp;
 	Kd = pid1.Td * pid1.Kp;
@@ -37,7 +42,7 @@ void PID_Init(void)
 	Timer_Init();
 }
 
-void PID_SetSpeed(uint16_t Speed)
+void PID_SetSpeed(uint8_t Speed)
 {
 	pid1.Sv = Speed;
 	pid2.Sv = Speed;
@@ -45,8 +50,10 @@ void PID_SetSpeed(uint16_t Speed)
 
 void PID_Ctrl(void)
 {
-	pid1.Ep = Encoder_Get1();
-	pid2.Ep = Encoder_Get2();
+	x1 = Encoder_Get1();
+	x2 = Encoder_Get2();
+	pid1.Ep = ABS(x1);
+	pid2.Ep = ABS(x2);
 	
 	//比例控制
 	pid1.Ek = pid1.Sv - pid1.Ep;
@@ -84,7 +91,9 @@ void PID_Ctrl(void)
 	pid1.Ek_1 = pid1.Ek;
 	pid2.Ek_1 = pid2.Ek;
 	
-	Serial_printf("%d, %d, %d\n", pid1.Ep, pid2.Ep, pid1.Sv);//利用VOFA输出波形
+	//Serial_printf("%d, %d, %d\n", pid1.Ep, pid2.Ep, pid1.Sv);//利用VOFA输出波形
+	OLED_ShowSignedNum(1, 1, x1, 5);
+	OLED_ShowSignedNum(1, 9, x2, 5);
 }
 
 void TIM2_IRQHandler(void)
@@ -92,7 +101,7 @@ void TIM2_IRQHandler(void)
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
 	{
 		count ++;
-		if (count == 2) 
+		if (count == 100) 
 		{
 			PID_Ctrl();
 			count = 0;

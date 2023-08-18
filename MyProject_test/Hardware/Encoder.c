@@ -37,11 +37,10 @@ void Encoder_Init(void)
 	TIM_ICInitStructure.TIM_ICFilter = 0xF;
 	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
 	TIM_ICInit(TIM3, &TIM_ICInitStructure);
-	
+	TIM_ICInit(TIM4, &TIM_ICInitStructure);
 	TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
-	TIM_ICInitStructure.TIM_ICFilter = 0xF;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
 	TIM_ICInit(TIM3, &TIM_ICInitStructure);
+	TIM_ICInit(TIM4, &TIM_ICInitStructure);
 	
 	//编码器配置（双边沿）
 	TIM_EncoderInterfaceConfig(TIM3, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Falling);

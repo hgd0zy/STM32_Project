@@ -7,6 +7,7 @@
 
 int8_t Speed = 0;
 char Command;
+int16_t x;
 int16_t max  = -32768, min = 32767;
 int16_t MPU6050_ACCEL[3];
 int16_t MPU6050_GYRO[3];
@@ -31,16 +32,16 @@ int main(void)
 				case 'd':
 					break;
 				case 'w':
-					if (Speed < 100) {Speed += 20;}
+					if (Speed < 55) {Speed += 5;}
 					Motor_SetSpeed(Speed);
 					break;
 				case 's':
-					Speed = -40;
+					Speed = -15;
 					Motor_SetSpeed(Speed);
 					break;
 				case 'x':
-					if(Speed > 0) {Speed -= 20;}
-					else if(Speed < 0){Speed += 20;}
+					if(Speed > 0) {Speed -= 5;}
+					else if(Speed < 0){Speed += 5;}
 					Motor_SetSpeed(Speed);
 					break;
 				default:
@@ -49,22 +50,17 @@ int main(void)
 			}
 			//Serial_printf("%d\r\n", Speed);
 		}
-		OLED_ShowString(1, 1, "V:");
-//		OLED_ShowSignedNum(1, 3, (int16_t)Encoder_Get1(), 5);
-//		OLED_ShowSignedNum(1, 11, (int16_t)Encoder_Get2(), 5);
-		OLED_ShowString(2, 1, "Sv:");
-		OLED_ShowSignedNum(2, 4, Speed, 3);
 		
-//		MPU6050_GetACCEL(MPU6050_ACCEL);
-//		MPU6050_GetGYRO(MPU6050_GYRO);
-//		
-//		OLED_ShowSignedNum(2, 1, MPU6050_ACCEL[0], 5);
-//		OLED_ShowSignedNum(3, 1, MPU6050_ACCEL[1], 5);
-//		OLED_ShowSignedNum(4, 1, MPU6050_ACCEL[2], 5);
-//		OLED_ShowSignedNum(2, 9, MPU6050_GYRO[0], 5);
-//		OLED_ShowSignedNum(3, 9, MPU6050_GYRO[1], 5);
-//		OLED_ShowSignedNum(4, 9, MPU6050_GYRO[2], 5);
-//		
+		MPU6050_GetACCEL(MPU6050_ACCEL);
+		MPU6050_GetGYRO(MPU6050_GYRO);
+		
+		OLED_ShowSignedNum(2, 1, MPU6050_ACCEL[0], 5);
+		OLED_ShowSignedNum(3, 1, MPU6050_ACCEL[1], 5);
+		OLED_ShowSignedNum(4, 1, MPU6050_ACCEL[2], 5);
+		OLED_ShowSignedNum(2, 9, MPU6050_GYRO[0], 5);
+		OLED_ShowSignedNum(3, 9, MPU6050_GYRO[1], 5);
+		OLED_ShowSignedNum(4, 9, MPU6050_GYRO[2], 5);
+		
 //		if (MPU6050_ACCEL[2] > max) {max = MPU6050_ACCEL[2];}
 //		else if (MPU6050_ACCEL[2]<min) {min = MPU6050_ACCEL[2];}
 //		Serial_printf("%d %d  ", max, min);

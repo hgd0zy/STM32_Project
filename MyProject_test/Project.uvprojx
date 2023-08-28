@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Start;.\Library;.\System;.\Hardware;.\DMP;.\PID;.\User</IncludePath>
+              <IncludePath>.\Start;.\Library;.\System;.\Hardware;.\MPU6050;.\PID;.\User</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -721,19 +721,34 @@
               <FilePath>.\Hardware\Encoder.h</FilePath>
             </File>
             <File>
+              <FileName>EXTIT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\EXTIT.c</FilePath>
+            </File>
+            <File>
+              <FileName>EXTIT.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\EXTIT.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MPU6050</GroupName>
+          <Files>
+            <File>
               <FileName>MPU6050.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Hardware\MPU6050.c</FilePath>
+              <FilePath>.\MPU6050\MPU6050.c</FilePath>
             </File>
             <File>
               <FileName>MPU6050.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Hardware\MPU6050.h</FilePath>
+              <FilePath>.\MPU6050\MPU6050.h</FilePath>
             </File>
             <File>
               <FileName>MPU6050_Reg.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Hardware\MPU6050_Reg.h</FilePath>
+              <FilePath>.\MPU6050\MPU6050_Reg.h</FilePath>
             </File>
           </Files>
         </Group>

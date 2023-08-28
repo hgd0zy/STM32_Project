@@ -1,7 +1,20 @@
 #include "stm32f10x.h"                  // Device header
 #include "MPU6050_Reg.h"
+#include "math.h"
 
 #define MPU6050_Address (0x68 << 1)
+#define PI 3.1415926535897
+
+static int16_t MPU6050_ACCEL[3];
+static int16_t MPU6050_GYRO[3];
+static float pitch_a, roll_a;
+static float pitch_g, roll_g;
+static float GYRO_Motrix[3][3] = {{1, 0, 0},{0, 1, 0},{0, 0, 1}};
+
+static float k_roll = 0, k_pitch = 0;
+static float P[2][2] = {{1, 0},{0, 1}}, P_[2][2], K[2][2];
+static float Q[2][2] = {{0.025, 0},{0, 0.025}};
+static float R[2][2] = {{0.3, 0},{0, 0.3}};
 
 //事件超时
 static void WaitEvent(I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
@@ -89,10 +102,12 @@ void MPU6050_Init(void)
 	
 	MPU6050_WReg(MPU6050_PWR_MGMT_1, 0x01);
 	MPU6050_WReg(MPU6050_PWR_MGMT_2, 0x00);
-	MPU6050_WReg(MPU6050_SMPLRT_DIV, 0x09);
-	MPU6050_WReg(MPU6050_CONFIG, 0x16);
 	MPU6050_WReg(MPU6050_ACCEL_CONFIG, 0x07);
 	MPU6050_WReg(MPU6050_GYRO_CONFIG, 0x18);
+	MPU6050_WReg(MPU6050_CONFIG, 0x16);
+	MPU6050_WReg(MPU6050_SMPLRT_DIV, 0x13);//50HZ
+	MPU6050_WReg(MPU6050_INT_PIN_CFG, 0x80);//配置低电平中断
+	MPU6050_WReg(MPU6050_INT_ENABLE, 0x01);//中断使能
 }
 
 //获取MPU模块总线地址
@@ -185,6 +200,95 @@ void MPU6050_GetGYRO(int16_t *Array)
 	Array[2] = (Gyro[4] << 8) | Gyro[5];
 }
 
+//使用加速度计解算姿态
+void calculate_acc(float *pitch, float *roll)
+{
+	MPU6050_GetACCEL(MPU6050_ACCEL);
+	
+	float tan_alpha = (float)MPU6050_ACCEL[1] / (float)MPU6050_ACCEL[2];
+	float tan_beta = MPU6050_ACCEL[1] * MPU6050_ACCEL[1] + MPU6050_ACCEL[2] * MPU6050_ACCEL[2];
+	tan_beta = sqrtf(tan_beta);
+	tan_beta = MPU6050_ACCEL[0] / tan_beta;
+	
+	*pitch = -atanf(tan_beta) / PI * 180;
+	*roll = atanf(tan_alpha) / PI * 180;
+	//*yaw = MPU6050_ACCEL[2] ;
+}
+
+//使用角速度计解算姿态
+void calculate_gyro(float *pitch, float *roll, float *yaw)
+{
+	static float V_pitch, V_roll, V_yaw;
+	
+	MPU6050_GetGYRO(MPU6050_GYRO);
+	
+	GYRO_Motrix[0][1] = (sinf(*pitch) * sinf(*roll)) / cosf(*pitch);
+	GYRO_Motrix[0][2] = (cosf(*roll) * sinf(*pitch)) / cosf(*pitch);
+	GYRO_Motrix[1][1] = cosf(*roll);
+	GYRO_Motrix[1][2] = -sinf(*roll);
+	GYRO_Motrix[2][1] = sinf(*roll) / cosf(*pitch);
+	GYRO_Motrix[2][2] = cosf(*roll) / cosf(*pitch);
+	V_roll = (GYRO_Motrix[0][0]*MPU6050_GYRO[0] + GYRO_Motrix[0][1]*MPU6050_GYRO[1] + GYRO_Motrix[0][2]*MPU6050_GYRO[2]) / 16.4;
+	V_pitch = (GYRO_Motrix[1][0]*MPU6050_GYRO[0] + GYRO_Motrix[1][1]*MPU6050_GYRO[1] + GYRO_Motrix[1][2]*MPU6050_GYRO[2]) / 16.4;
+	V_yaw = (GYRO_Motrix[2][0]*MPU6050_GYRO[0] + GYRO_Motrix[2][1]*MPU6050_GYRO[1] + GYRO_Motrix[2][2]*MPU6050_GYRO[2]) / 16.4;
+	
+	*pitch = *pitch + V_pitch * 0.02;
+	*roll = *roll + V_roll * 0.02;
+	*yaw = *yaw + V_yaw * 0.02;
+}
+
+//卡尔曼滤波
+void kalman_filter(float *pitch, float *roll)
+{
+	static float V_pitch, V_roll;
+	
+	calculate_acc(&pitch_a, &roll_a);
+	MPU6050_GetGYRO(MPU6050_GYRO);
+	
+	MPU6050_GYRO[0] -= (-42);
+	MPU6050_GYRO[1] -= (-26);
+	MPU6050_GYRO[2] -= (-99);
+	
+	GYRO_Motrix[0][1] = (sinf(*pitch) * sinf(*roll)) / cosf(*pitch);
+	GYRO_Motrix[0][2] = (cosf(*roll) * sinf(*pitch)) / cosf(*pitch);
+	GYRO_Motrix[1][1] = cosf(*roll);
+	GYRO_Motrix[1][2] = -sinf(*roll);
+	GYRO_Motrix[2][1] = sinf(*roll) / cosf(*pitch);
+	GYRO_Motrix[2][2] = cosf(*roll) / cosf(*pitch);
+	V_roll = (GYRO_Motrix[0][0]*MPU6050_GYRO[0] + GYRO_Motrix[0][1]*MPU6050_GYRO[1] + GYRO_Motrix[0][2]*MPU6050_GYRO[2]) / 16.4;
+	V_pitch = (GYRO_Motrix[1][0]*MPU6050_GYRO[0] + GYRO_Motrix[1][1]*MPU6050_GYRO[1] + GYRO_Motrix[1][2]*MPU6050_GYRO[2]) / 16.4;
+	
+	//Step1
+	pitch_g = k_pitch + V_pitch * 0.02;
+	roll_g = k_roll + V_roll * 0.02;
+	
+	//Step2
+	P_[0][0] = P[0][0] + Q[0][0];
+	P_[0][1] = 0;
+	P_[1][0] = 0;
+	P_[1][1] = P[1][1] + Q[1][1];
+	
+	//Step3
+	K[0][0] = P_[0][0]/(P_[0][0] + R[0][0]);
+	K[0][1] = 0;
+	K[1][0] = 0;
+	K[1][1] = P_[1][1]/(P_[1][1] + R[1][1]);
+	
+	//Step4
+	k_roll = roll_g + K[0][0]*(roll_a - roll_g);
+	k_pitch = pitch_g + K[1][1]*(pitch_a - pitch_g);
+	
+	//Step5
+	P[0][0] = (1 - K[0][0])*P[0][0];
+	P[0][1] = 0;
+	P[1][0] = 0;
+	P[1][1] = (1 - K[1][1])*P[1][1];
+	
+	*pitch = k_pitch;
+	*roll = k_roll;
+}
+
+//测试用
 uint8_t MPU6050_Test(void)
 {
 	uint8_t TestArray[2] = {0xEE, 0xFF};

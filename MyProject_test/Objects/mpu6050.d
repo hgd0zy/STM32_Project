@@ -1,4 +1,4 @@
-.\objects\mpu6050.o: Hardware\MPU6050.c
+.\objects\mpu6050.o: MPU6050\MPU6050.c
 .\objects\mpu6050.o: .\Start\stm32f10x.h
 .\objects\mpu6050.o: .\Start\core_cm3.h
 .\objects\mpu6050.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
@@ -28,4 +28,4 @@
 .\objects\mpu6050.o: .\Library\stm32f10x_usart.h
 .\objects\mpu6050.o: .\Library\stm32f10x_wwdg.h
 .\objects\mpu6050.o: .\Library\misc.h
-.\objects\mpu6050.o: Hardware\MPU6050_Reg.h
+.\objects\mpu6050.o: MPU6050\MPU6050_Reg.h

@@ -33,4 +33,6 @@
 .\objects\main.o: .\Hardware\Serial.h
 .\objects\main.o: D:\Keil5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: .\Hardware\Encoder.h
-.\objects\main.o: .\Hardware\MPU6050.h
+.\objects\main.o: .\MPU6050\MPU6050.h
+.\objects\main.o: .\PID\PID.h
+.\objects\main.o: .\Hardware\EXTIT.h

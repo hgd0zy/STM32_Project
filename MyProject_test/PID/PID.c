@@ -1,16 +1,13 @@
 #include "stm32f10x.h"                  // Device header
 #include "PID.h"
 #include "PWM.h"
-#include "Encoder.h"
 #include "Timer.h"
 #include "Serial.h"
-#include "OLED.h"
 
 #define ABS(x) ((x) = (x)<0?-(x):(x))
 
 static PID pid1, pid2;
 static float Ki, Kd, DeltaK1, DeltaK2;
-static uint8_t count = 0;
 static float Out1, Out2;
 int16_t x1, x2;
 	
@@ -38,7 +35,6 @@ void PID_Init(void)
 	Ki = pid1.T / pid1.Ti * pid1.Kp;
 	Kd = pid1.Td * pid1.Kp;
 	
-	PWM_Init();
 	Timer_Init();
 }
 
@@ -48,12 +44,10 @@ void PID_SetSpeed(uint8_t Speed)
 	pid2.Sv = Speed;
 }
 
-void PID_Ctrl(void)
+void PID_Ctrl(int16_t l_speed, int16_t r_speed)
 {
-	x1 = Encoder_Get1();
-	x2 = Encoder_Get2();
-	pid1.Ep = ABS(x1);
-	pid2.Ep = ABS(x2);
+	pid1.Ep = ABS(l_speed);
+	pid2.Ep = ABS(r_speed);
 	
 	//比例控制
 	pid1.Ek = pid1.Sv - pid1.Ep;
@@ -92,20 +86,5 @@ void PID_Ctrl(void)
 	pid2.Ek_1 = pid2.Ek;
 	
 	//Serial_printf("%d, %d, %d\n", pid1.Ep, pid2.Ep, pid1.Sv);//利用VOFA输出波形
-	OLED_ShowSignedNum(1, 1, x1, 5);
-	OLED_ShowSignedNum(1, 9, x2, 5);
 }
 
-void TIM2_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
-	{
-		count ++;
-		if (count == 100) 
-		{
-			PID_Ctrl();
-			count = 0;
-		}
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	}
-}

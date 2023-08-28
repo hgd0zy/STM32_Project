@@ -9,6 +9,9 @@ void MPU6050_WriteRegArray(uint8_t *Array, uint8_t Reg, uint8_t Length);
 void MPU6050_ReadRegArray(uint8_t *Array, uint8_t Reg, uint8_t Length);
 void MPU6050_GetACCEL(int16_t *Array);
 void MPU6050_GetGYRO(int16_t *Array);
+void calculate_acc(float *pitch, float *roll);
+void calculate_gyro(float *pitch, float *roll, float *yaw);
+void kalman_filter(float *pitch, float *roll);
 uint8_t MPU6050_Test(void);
 
 #endif

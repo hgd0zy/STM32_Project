@@ -4,21 +4,24 @@
 #include "Serial.h"
 #include "Encoder.h"
 #include "MPU6050.h"
+#include "PID.h"
+#include "EXTIT.h"
 
 int8_t Speed = 0;
 char Command;
-int16_t x;
 int16_t max  = -32768, min = 32767;
-int16_t MPU6050_ACCEL[3];
-int16_t MPU6050_GYRO[3];
+uint16_t l_speed, r_speed;
+static float k_pitch, k_roll;
 
 int main(void)
 {
 	OLED_Init();
-	Motor_Init();
 	Serial_Init();
-	Encoder_Init();
 	MPU6050_Init();
+	Motor_Init();
+	Encoder_Init();
+	PID_Init();
+	EXTIT_Init();
 	
 	while(1)
 	{
@@ -48,23 +51,34 @@ int main(void)
 					Serial_printf("Error Command!\r\n");
 					break;
 			}
-			//Serial_printf("%d\r\n", Speed);
 		}
 		
-		MPU6050_GetACCEL(MPU6050_ACCEL);
-		MPU6050_GetGYRO(MPU6050_GYRO);
-		
-		OLED_ShowSignedNum(2, 1, MPU6050_ACCEL[0], 5);
-		OLED_ShowSignedNum(3, 1, MPU6050_ACCEL[1], 5);
-		OLED_ShowSignedNum(4, 1, MPU6050_ACCEL[2], 5);
-		OLED_ShowSignedNum(2, 9, MPU6050_GYRO[0], 5);
-		OLED_ShowSignedNum(3, 9, MPU6050_GYRO[1], 5);
-		OLED_ShowSignedNum(4, 9, MPU6050_GYRO[2], 5);
-		
-//		if (MPU6050_ACCEL[2] > max) {max = MPU6050_ACCEL[2];}
-//		else if (MPU6050_ACCEL[2]<min) {min = MPU6050_ACCEL[2];}
-//		Serial_printf("%d %d  ", max, min);
-//		Serial_printf("%.4f\t", (float)(MPU6050_ACCEL[0]-1069)/16384*1.2*180/3.14/9.8);
+		OLED_ShowSignedNum(1, 1, k_pitch, 3);
+		OLED_ShowSignedNum(2, 1, k_roll, 3);
 	}
 	//return 0;
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+	if (EXTI_GetITStatus(EXTI_Line14) == SET)
+	{
+		kalman_filter(&k_pitch, &k_roll);
+		
+		PID_Ctrl(l_speed, r_speed);
+		
+		EXTI_ClearITPendingBit(EXTI_Line14);
+	}
+}
+
+
+void TIM2_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	{	
+		l_speed = Encoder_Get1();
+		r_speed = Encoder_Get2();
+		
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	}
 }

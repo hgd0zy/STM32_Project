@@ -24,5 +24,6 @@ typedef struct PID{
 
 void PID_Init(void);
 void PID_SetSpeed(uint8_t Speed);
+void PID_Ctrl(int16_t l_speed, int16_t r_speed);
 
 #endif
